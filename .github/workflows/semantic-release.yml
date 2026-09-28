@@ -1,0 +1,134 @@
+name: semantic-release (reusable)
+
+# Runs semantic-release for a consuming repo with the shared toolchain: this repo's
+# `semantic-release`, `@semantic-release/*` plugins and changelog preset, at the
+# SHA the caller pinned. The caller keeps its own release config (.releaserc.json)
+# for options — branches, tagFormat, releaseRules, success comments — and no
+# longer carries any release toolchain in its own package.json.
+#
+#   on:
+#     push:
+#       branches: [main]
+#   permissions:
+#     contents: write
+#     issues: write
+#     pull-requests: write
+#     id-token: write # only when publishing to npm
+#   jobs:
+#     release:
+#       uses: rmartz/semantic-release-ci/.github/workflows/semantic-release.yml@<sha>  # vX.Y.Z
+#
+# There is deliberately no `permissions:` block here. A called workflow can only
+# narrow the caller's grant, and one that asks for a scope the caller did not grant
+# fails to start — so the caller grants exactly what its release config needs
+# (docs/consuming.md) and this workflow inherits it.
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version the toolchain (and any build-command) runs on.'
+        type: string
+        required: false
+        default: 24.x
+      package-manager:
+        description: 'pnpm | npm — how the caller installs its own dependencies when build-command is set.'
+        type: string
+        required: false
+        default: pnpm
+      build-command:
+        description: 'Command run in the caller checkout before releasing (e.g. `pnpm run build` ahead of @semantic-release/npm). Empty skips the install and build.'
+        type: string
+        required: false
+        default: ''
+      github-packages:
+        description: 'Authenticate @semantic-release/npm to GitHub Packages with the job token (caller grants `packages: write`). Leave false for npmjs, which uses OIDC trusted publishing.'
+        type: boolean
+        required: false
+        default: false
+      timeout-minutes:
+        description: 'Job timeout.'
+        type: number
+        required: false
+        default: 10
+
+jobs:
+  release:
+    # A release only ever runs from a pushed ref; never on a PR, where the caller's
+    # token could be a fork's.
+    if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    # Serialize releases per repo so two pushes can't publish concurrently. A
+    # release is never cancelled mid-flight.
+    concurrency:
+      group: semantic-release-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - name: Check out the repository to release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # semantic-release needs full history + tags
+          persist-credentials: false # semantic-release authenticates via GITHUB_TOKEN
+
+      - name: Check out the shared toolchain
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          path: _semantic-release-ci
+
+      - name: Set up pnpm for the toolchain
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          package_json_file: _semantic-release-ci/package.json
+
+      # Also keeps _semantic-release-ci out of the tree @semantic-release/npm packs
+      # and out of any `git status` the release inspects.
+      - name: Move the toolchain outside the caller's workspace
+        run: mv "$GITHUB_WORKSPACE/_semantic-release-ci" "$RUNNER_TEMP/semantic-release-ci"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install the toolchain
+        run: pnpm -C "$RUNNER_TEMP/semantic-release-ci" install --frozen-lockfile --prod
+
+      # The caller's install uses the pnpm THEIR package.json pins. It runs after
+      # the toolchain install, so their pnpm shadows ours from here on.
+      - name: Set up pnpm for the build
+        if: inputs.build-command != '' && inputs.package-manager == 'pnpm'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Install dependencies
+        if: inputs.build-command != ''
+        env:
+          PACKAGE_MANAGER: ${{ inputs.package-manager }}
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          case "$PACKAGE_MANAGER" in
+            pnpm) pnpm install --frozen-lockfile ;;
+            npm) npm ci ;;
+            *) echo "Unsupported package-manager: $PACKAGE_MANAGER (expected pnpm or npm)"; exit 1 ;;
+          esac
+
+      - name: Build
+        if: inputs.build-command != ''
+        env:
+          BUILD_COMMAND: ${{ inputs.build-command }}
+        run: bash -c "$BUILD_COMMAND"
+
+      # Run from the caller's checkout: semantic-release reads the release config
+      # and git history from the working directory, and resolves its plugins and
+      # preset from its own install first — the shared toolchain.
+      # NPM_TOKEN stays empty unless github-packages is set: @semantic-release/npm
+      # treats an empty token as absent and falls through to OIDC trusted
+      # publishing, the npmjs path.
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ inputs.github-packages && github.token || '' }}
+        run: '"$RUNNER_TEMP/semantic-release-ci/node_modules/.bin/semantic-release"'

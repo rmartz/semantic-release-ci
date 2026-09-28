@@ -1,0 +1,61 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      # CI tooling never reaches the shipped artifact on its own; a pin bump inside
+      # a reusable workflow that consumers should receive is retitled `fix` in review.
+      prefix: chore
+      include: scope
+    groups:
+      # Minor/patch bumps batched; majors fall out into isolated PRs for review.
+      github-actions:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      # Split by dependency type (rmartz/ai#82). The production dependencies ARE
+      # the release toolchain every consumer runs, so a bump is a `fix` that cuts a
+      # release; a dev-dependency bump never reaches a consumer, so it is a
+      # release-less `chore`.
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    ignore:
+      # Kept on the major semantic-release itself depends on, so the release check
+      # reads configs with the same loader the release does.
+      - dependency-name: cosmiconfig
+        update-types:
+          - version-update:semver-major
+    groups:
+      # The toolchain moves together: semantic-release, its plugins and the
+      # changelog preset are only meaningful as a tested combination. Majors fall
+      # out into their own PRs, where the release-check job proves (or refutes)
+      # that the new major still works with the rest — e.g. a preset major that
+      # needs a newer conventional-changelog-writer than semantic-release bundles
+      # fails here and never reaches a consumer.
+      release-toolchain:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      # Prettier isolated into its own group so a reformatting bump can't hide in a
+      # catch-all (a Prettier minor can reformat the whole tree).
+      prettier:
+        patterns:
+          - 'prettier'
+      dev-dependencies:
+        dependency-type: development
+        exclude-patterns:
+          - 'prettier'
+        update-types:
+          - minor
+          - patch

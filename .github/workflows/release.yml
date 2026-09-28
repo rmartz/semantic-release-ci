@@ -1,0 +1,26 @@
+name: Release
+
+# This repo's own releases, cut by its own shipped release workflow at this commit
+# (dogfood). semantic-release runs on every push to main: it analyzes the
+# conventional-commit subjects since the last vX.Y.Z tag, computes the next
+# version, and creates the git tag + GitHub Release.
+#
+# This repo is CI-only and UNPUBLISHED — there is deliberately NO
+# @semantic-release/npm plugin in .releaserc.json and package.json stays a
+# `private` `0.0.0` placeholder. The release exists so Dependabot's
+# github-actions ecosystem can bump the `@<sha>` pins consumers put on the
+# reusable workflows: each vX.Y.Z tag is a bumpable ref. Only the built-in
+# GITHUB_TOKEN is used.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write # create tags and GitHub releases
+  issues: write # semantic-release comments on released issues
+  pull-requests: write # semantic-release comments on released PRs
+
+jobs:
+  release:
+    uses: ./.github/workflows/semantic-release.yml
