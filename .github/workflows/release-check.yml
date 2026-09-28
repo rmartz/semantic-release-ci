@@ -1,0 +1,73 @@
+name: Release check (reusable)
+
+# Pre-merge guard for a consuming repo's semantic-release setup: loads the repo's
+# release config exactly as semantic-release would and runs the shared toolchain's
+# real commit-analyzer and release-notes-generator on synthetic commits. It fails
+# on a config that would not release or render — a preset/writer mismatch, a bad
+# preset option, a plugin the toolchain does not ship, a preset that drops `!`.
+#
+#   jobs:
+#     release-check:
+#       uses: rmartz/semantic-release-ci/.github/workflows/release-check.yml@<sha>  # vX.Y.Z
+#
+# It needs only `contents: read` — no token, network, or push — so it runs on
+# Dependabot and fork PRs, which is where `semantic-release --dry-run` passes
+# without testing anything. See docs/release-check.md.
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version the toolchain runs on.'
+        type: string
+        required: false
+        default: 24.x
+
+permissions:
+  contents: read
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository under test
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The toolchain is this repo at the exact SHA the caller pinned, so the check
+      # runs the same plugin versions the release workflow at that pin will.
+      - name: Check out the shared toolchain
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          persist-credentials: false
+          # actions/checkout refuses any path outside GITHUB_WORKSPACE; the move
+          # below takes it out before anything installs.
+          path: _semantic-release-ci
+
+      # Our install uses the pnpm OUR package.json pins, not the caller's.
+      # package_json_file resolves against GITHUB_WORKSPACE, so this runs before
+      # the move.
+      - name: Set up pnpm for the toolchain
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          package_json_file: _semantic-release-ci/package.json
+
+      # Left inside the caller's checkout, the install would inherit their ancestor
+      # files: a root pnpm-workspace.yaml resolves THEIR graph, and a root .npmrc
+      # scoping a private registry 401s on packages we never declared.
+      - name: Move the toolchain outside the caller's workspace
+        run: mv "$GITHUB_WORKSPACE/_semantic-release-ci" "$RUNNER_TEMP/semantic-release-ci"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install the toolchain
+        run: pnpm -C "$RUNNER_TEMP/semantic-release-ci" install --frozen-lockfile --prod
+
+      - name: Check the release config
+        run: node "$RUNNER_TEMP/semantic-release-ci/src/bin/release-check.ts" --cwd "$GITHUB_WORKSPACE"
