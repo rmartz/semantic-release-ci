@@ -14,6 +14,7 @@ tags: [semantic-release, ci, configuration, workflows]
 | `node-version`    | `24.x`  | Node.js for the toolchain and any `build-command`.                                                                                                                 |
 | `build-command`   | `''`    | Runs in your checkout before releasing, e.g. `pnpm run build` ahead of `@semantic-release/npm`. When set, your dependencies are installed first. Empty skips both. |
 | `package-manager` | `pnpm`  | `pnpm` or `npm`: how your dependencies are installed for `build-command` (`pnpm install --frozen-lockfile` with the pnpm your `package.json` pins, or `npm ci`).   |
+| `github-packages` | `false` | Publish to GitHub Packages: authenticates `@semantic-release/npm` with the job token (grant `packages: write`). Leave off for npmjs, which uses OIDC.              |
 | `timeout-minutes` | `10`    | The release job's timeout.                                                                                                                                         |
 
 The job never runs on `pull_request` / `pull_request_target`, and releases are

@@ -44,7 +44,8 @@ grant what your release config needs — and nothing it doesn't:
 | `contents: write`      | Always: semantic-release pushes the tag and `@semantic-release/github` creates the release. |
 | `issues: write`        | `@semantic-release/github` success/fail comments are on (its default).                      |
 | `pull-requests: write` | Same: comments on released PRs.                                                             |
-| `id-token: write`      | You publish to npm with `@semantic-release/npm` (trusted publishing, below).                |
+| `id-token: write`      | You publish to npmjs with `@semantic-release/npm` (trusted publishing, below).              |
+| `packages: write`      | You publish to GitHub Packages instead (`github-packages: true`, below).                    |
 
 A caller's `permissions:` block is exhaustive, and a called workflow can only
 narrow it. If you have turned comments off (`"successComment": false`,
@@ -81,6 +82,12 @@ jobs:
   Packages dependency; grant `packages: read` too if you have one.
 - `@semantic-release/npm` bundles its own npm CLI (≥ 11.5.1, which trusted
   publishing requires), so the runner's npm version does not matter.
+
+**GitHub Packages.** A package whose `publishConfig.registry` is
+`https://npm.pkg.github.com` grants `packages: write` instead of `id-token: write`
+and sets `github-packages: true`, which authenticates the publish with the job
+token (the same `NPM_TOKEN: GITHUB_TOKEN` a repo-local release used). Nothing else
+changes; OIDC is untouched when it is off.
 
 ## Release check
 

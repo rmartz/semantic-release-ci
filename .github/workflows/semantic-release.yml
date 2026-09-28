@@ -41,6 +41,11 @@ on:
         type: string
         required: false
         default: ''
+      github-packages:
+        description: 'Authenticate @semantic-release/npm to GitHub Packages with the job token (caller grants `packages: write`). Leave false for npmjs, which uses OIDC trusted publishing.'
+        type: boolean
+        required: false
+        default: false
       timeout-minutes:
         description: 'Job timeout.'
         type: number
@@ -119,7 +124,11 @@ jobs:
       # Run from the caller's checkout: semantic-release reads the release config
       # and git history from the working directory, and resolves its plugins and
       # preset from its own install first — the shared toolchain.
+      # NPM_TOKEN stays empty unless github-packages is set: @semantic-release/npm
+      # treats an empty token as absent and falls through to OIDC trusted
+      # publishing, the npmjs path.
       - name: Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ inputs.github-packages && github.token || '' }}
         run: '"$RUNNER_TEMP/semantic-release-ci/node_modules/.bin/semantic-release"'
