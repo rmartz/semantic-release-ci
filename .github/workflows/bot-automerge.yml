@@ -17,6 +17,13 @@ name: bot-automerge
 # `cancelled` check-runs on the PR — a conclusion our automation reads as failing.
 # Without a group nothing queues, so nothing is cancelled; the cost is a few
 # redundant no-op runs, which the skip guard below makes nearly free.
+#
+# The merge runs under BOT_AUTOMERGE_TOKEN, a real-actor PAT (Contents, Pull
+# requests and Workflows: read and write). GitHub fires no workflows for a merge
+# enabled with the workflow GITHUB_TOKEN, so without it a bot merge reaches main
+# with no CI, Release or merge-safety invalidation run. The secret is set in both
+# the Actions and Dependabot stores, since a Dependabot-triggered run sees only
+# the latter; when it is unset the action falls back to github.token.
 
 on:
   pull_request_target:
@@ -25,7 +32,6 @@ on:
 permissions:
   contents: write # enable GitHub-native auto-merge on the PR
   pull-requests: write # read PR metadata + turn on auto-merge
-  packages: read # install the @rmartz/bot-automerge CLI from GitHub Packages
 
 jobs:
   bot-automerge:
@@ -45,7 +51,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: rmartz/bot-automerge-action@a46eafc1396993ffc04918f452b3d1c0e3c80f4f # v1.1.1
+      - uses: rmartz/bot-automerge-action@95393747671fc136f9759b44d9a979db10cd087b # v2.1.0
         with:
           pr: ${{ github.event.pull_request.number }}
-          release-please-token: ${{ secrets.RELEASE_PLEASE_PAT }}
+          token: ${{ secrets.BOT_AUTOMERGE_TOKEN }}
