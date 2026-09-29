@@ -9,13 +9,13 @@ tags: [semantic-release, ci, configuration, workflows]
 
 ## `semantic-release.yml`
 
-| Input             | Default | What it controls                                                                                                                                                   |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `node-version`    | `24.x`  | Node.js for the toolchain and any `build-command`.                                                                                                                 |
-| `build-command`   | `''`    | Runs in your checkout before releasing, e.g. `pnpm run build` ahead of `@semantic-release/npm`. When set, your dependencies are installed first. Empty skips both. |
-| `package-manager` | `pnpm`  | `pnpm` or `npm`: how your dependencies are installed for `build-command` (`pnpm install --frozen-lockfile` with the pnpm your `package.json` pins, or `npm ci`).   |
-| `github-packages` | `false` | Publish to GitHub Packages: authenticates `@semantic-release/npm` with the job token (grant `packages: write`). Leave off for npmjs, which uses OIDC.              |
-| `timeout-minutes` | `10`    | The release job's timeout.                                                                                                                                         |
+| Input             | Default | What it controls                                                                                                                                                                          |
+| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `node-version`    | `24.x`  | Node.js for the toolchain and any `build-command`. npm trusted publishing needs its npm ≥ 11.5.1 (Node 24+); with `id-token: write` granted, an older npm fails the job before releasing. |
+| `build-command`   | `''`    | Runs in your checkout before releasing, e.g. `pnpm run build` ahead of `@semantic-release/npm`. When set, your dependencies are installed first. Empty skips both.                        |
+| `package-manager` | `pnpm`  | `pnpm` or `npm`: how your dependencies are installed for `build-command` (`pnpm install --frozen-lockfile` with the pnpm your `package.json` pins, or `npm ci`).                          |
+| `github-packages` | `false` | Publish to GitHub Packages: authenticates `@semantic-release/npm` with the job token (grant `packages: write`). Leave off for npmjs, which uses OIDC.                                     |
+| `timeout-minutes` | `10`    | The release job's timeout.                                                                                                                                                                |
 
 The job never runs on `pull_request` / `pull_request_target`, and releases are
 serialized per repository (`cancel-in-progress: false`). It declares no
@@ -56,8 +56,11 @@ The versions are this repo's `package.json` `dependencies` at the SHA you pin:
 - `@semantic-release/release-notes-generator`
 - `@semantic-release/npm`
 - `@semantic-release/github`
+- `@semantic-release/exec` — runs shell commands at release steps, e.g. an
+  `npm publish` in `prepare` so a failed publish stops the release before the tag
+  is pushed (rmartz/merge-safety#76)
 - the `conventional-changelog-conventionalcommits` preset
 
-Need another plugin (`@semantic-release/exec`, `@semantic-release/git`, …)? Add
+Need another plugin (`@semantic-release/git`, …)? Add
 it to `dependencies` here in a `feat:` PR — never to your own repo, where the
 release would not load it.
