@@ -59,6 +59,22 @@ describe('semantic-release.yml', () => {
       expect(job.permissions).toBeUndefined();
     }
   });
+
+  // npm trusted publishing needs npm >= 11.5.1, and the publish uses the
+  // runner's npm. The check must run unconditionally (it decides from the
+  // runner's ACTIONS_ID_TOKEN_REQUEST_URL, which no `if:` can see) and before the
+  // release, so an old npm fails before any tag is pushed (rmartz/merge-safety#76).
+  it('checks the npm version before releasing, from inside the script', () => {
+    const steps = stepsOf(workflow);
+    const check = steps.findIndex((step) => step.name === 'Check npm supports trusted publishing');
+    const release = steps.findIndex((step) => step.name === 'Release');
+    expect(check).toBeGreaterThan(-1);
+    expect(release).toBeGreaterThan(check);
+    const checkStep = steps[check] as Step & { if?: string };
+    expect(checkStep.if).toBeUndefined();
+    expect(checkStep.run).toContain('ACTIONS_ID_TOKEN_REQUEST_URL');
+    expect(checkStep.run).toContain('11.5.1');
+  });
 });
 
 describe('release-check.yml', () => {
