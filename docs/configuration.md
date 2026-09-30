@@ -46,7 +46,10 @@ Both workflows read your config the way semantic-release does — `.releaserc`,
 - cuts no release for `feat:` or `fix:`, or one for `feat!:` lower than for
   `feat:` — so the `!` marker the fleet's merge flow stamps is honored. A pre-1.0
   cap (`{ "breaking": true, "release": "minor" }`) passes;
-- cannot render release notes (a preset/writer mismatch, a bad preset option).
+- cannot render release notes (a preset/writer mismatch, a bad preset option);
+- publishes to npm after the tag is pushed: `@semantic-release/npm` without
+  `"npmPublish": false`, or an `@semantic-release/exec` publish in `publishCmd`
+  or ahead of `@semantic-release/npm`. See [publish-order.md](publish-order.md).
 
 ## Plugins the toolchain ships
 
@@ -56,9 +59,9 @@ The versions are this repo's `package.json` `dependencies` at the SHA you pin:
 - `@semantic-release/release-notes-generator`
 - `@semantic-release/npm`
 - `@semantic-release/github`
-- `@semantic-release/exec` — runs shell commands at release steps, e.g. an
-  `npm publish` in `prepare` so a failed publish stops the release before the tag
-  is pushed (rmartz/merge-safety#76)
+- `@semantic-release/exec` — runs shell commands at release steps; npm
+  publishers run `npm publish` from its `prepareCmd`
+  ([publish-order.md](publish-order.md))
 - the `conventional-changelog-conventionalcommits` preset
 
 Need another plugin (`@semantic-release/git`, …)? Add
