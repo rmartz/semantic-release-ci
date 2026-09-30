@@ -15,5 +15,8 @@ written in [Open Knowledge Format](okf-format.md).
 - [Why the release check, not `semantic-release --dry-run`](release-check.md) —
   why a dry-run passes on a PR without testing anything, and what the check runs
   instead.
+- [Publish to npm before the tag is pushed](publish-order.md) — why npm
+  publishers publish from an `@semantic-release/exec` `prepareCmd`, and what the
+  release check fails.
 - [The OKF documentation format](okf-format.md) — how these pages are structured
   and validated in this repo.

@@ -89,11 +89,25 @@ jobs:
   (rmartz/merge-safety#76). When the caller grants `id-token: write`, the workflow
   checks the npm version first and fails before releasing.
 
+- **Publish before the tag.** Turn off `@semantic-release/npm`'s own publish and
+  run `npm publish` from `@semantic-release/exec` in `prepare`, listed after it,
+  so a failed publish stops the release before the tag is pushed. The release
+  check fails any other shape:
+
+  ```jsonc
+  ["@semantic-release/npm", { "npmPublish": false }],
+  ["@semantic-release/exec", { "prepareCmd": "npm publish" }],
+  ```
+
+  Why, and the edge cases (`pkgRoot`, GitHub Packages auth):
+  [publish-order.md](publish-order.md).
+
 **GitHub Packages.** A package whose `publishConfig.registry` is
 `https://npm.pkg.github.com` grants `packages: write` instead of `id-token: write`
-and sets `github-packages: true`, which authenticates the publish with the job
-token (the same `NPM_TOKEN: GITHUB_TOKEN` a repo-local release used). Nothing else
-changes; OIDC is untouched when it is off.
+and sets `github-packages: true`, which exports the job token as `NPM_TOKEN`
+(the same `NPM_TOKEN: GITHUB_TOKEN` a repo-local release used). Because the
+publish runs from `@semantic-release/exec`, your `.npmrc` must read it:
+`//npm.pkg.github.com/:_authToken=${NPM_TOKEN}`. OIDC is untouched when it is off.
 
 ## Release check
 
@@ -127,7 +141,8 @@ One PR per repo:
    the old one in another.
 3. Remove `semantic-release`, every `@semantic-release/*` package, and
    `conventional-changelog-conventionalcommits` from `devDependencies`, and the
-   Dependabot `ignore` rule for the preset major.
+   Dependabot `ignore` rule for the preset major. An npm publisher also moves its
+   publish into `prepare` ([publish-order.md](publish-order.md)).
 4. After the PR's `release-check / release-check` has posted green, add it to the
    ruleset's required checks and drop the old guard's context. Always confirm a
    context posts before requiring it.

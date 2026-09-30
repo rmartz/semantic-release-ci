@@ -1,5 +1,7 @@
 import { cosmiconfig } from 'cosmiconfig';
 
+import { checkPublishOrder } from './publish-order.ts';
+
 /**
  * The release check: prove a repo's semantic-release config works with the shared
  * toolchain, without a token, the network, or a push.
@@ -11,7 +13,8 @@ import { cosmiconfig } from 'cosmiconfig';
  * config semantic-release would, then call the real commit-analyzer and
  * release-notes-generator plugins directly on synthetic commits. A preset/writer
  * mismatch, a bad preset option, or a plugin the toolchain does not ship fails
- * here. See docs/release-check.md.
+ * here, as does an npm publish that runs after the tag is pushed
+ * (see publish-order.ts). See docs/release-check.md.
  */
 
 export type ReleaseConfig = {
@@ -194,6 +197,8 @@ export async function checkReleaseConfig(
       );
     }
   }
+
+  result.failures.push(...checkPublishOrder(entries));
 
   const analyzer = loaded.get(COMMIT_ANALYZER);
   if (analyzer) {

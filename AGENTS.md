@@ -60,6 +60,10 @@ checklist's "renaming a shared check" rule). Full reference:
   the installed commit-analyzer and release-notes-generator. Never replace it
   with `semantic-release --dry-run`, which exits on a PR before rendering notes
   (see [docs/release-check.md](docs/release-check.md)).
+- **npm publishes before the tag.** The check fails a config that would publish
+  in semantic-release's `publish` step, after the tag is pushed
+  ([docs/publish-order.md](docs/publish-order.md)). Loosening that rule
+  reintroduces tags with no package behind them.
 
 `test/workflow-contract.test.ts` guards the workflow invariants.
 

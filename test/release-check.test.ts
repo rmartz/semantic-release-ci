@@ -34,12 +34,13 @@ describe('checkReleaseConfig', () => {
     expect(notes.some((note) => note.startsWith('Release notes render'))).toBe(true);
   });
 
-  it("fails semantic-release's default plugins, whose angular preset drops '!'", async () => {
+  it("fails semantic-release's default plugins: angular drops '!', npm publishes after the tag", async () => {
     const { failures } = await check('angular-default');
     expect(failures).toEqual(
       expect.arrayContaining([
         expect.stringContaining('"@semantic-release/commit-analyzer" must set "preset"'),
         expect.stringContaining("does not honor the '!' breaking marker"),
+        expect.stringContaining('"@semantic-release/npm" publishes after the tag is pushed'),
       ]),
     );
   });
