@@ -66,3 +66,14 @@ workflow SHA whose toolchain has passed.
 
 Verified when the check was written: it fails with preset `^10.4.0` +
 `release-notes-generator@14.1.1` (the error above) and passes with `^9.3.1`.
+
+## The shared toolchain's writer override
+
+The shared toolchain ships preset `^10.4.0` anyway. Because every consumer runs
+this repo's lockfile (`pnpm install --frozen-lockfile` in the reusable
+workflows), a `pnpm.overrides` entry in [`package.json`](../package.json) —
+`@semantic-release/release-notes-generator>conventional-changelog-writer` →
+`^9.2.1` — gives the generator writer 9 for every consumer too. No stable
+`release-notes-generator` depends on writer 9 yet (only `15.0.0-beta.*` does).
+**Remove the override** once a stable `release-notes-generator` release depends
+on `conventional-changelog-writer@^9` and the toolchain is bumped to it.
