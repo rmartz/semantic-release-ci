@@ -80,8 +80,14 @@ jobs:
   pnpm your `package.json` pins; or `npm`). The install gets
   `NODE_AUTH_TOKEN: ${{ github.token }}` for a `.npmrc` that scopes a GitHub
   Packages dependency; grant `packages: read` too if you have one.
-- `@semantic-release/npm` bundles its own npm CLI (≥ 11.5.1, which trusted
-  publishing requires), so the runner's npm version does not matter.
+- **npm ≥ 11.5.1, so Node 24.** Trusted publishing needs npm 11.5.1 or later, and
+  the publish runs with the **runner's** npm: `@semantic-release/npm` depends on npm
+  11 but prefers a `node_modules/.bin/npm`, and pnpm links only direct
+  dependencies' binaries there. The default `node-version: 24.x` ships npm 11.
+  Don't override it with an older Node: npm 10 completes the OIDC exchange and then
+  fails `npm publish` with `ENEEDAUTH`, after the tag is already pushed
+  (rmartz/merge-safety#76). When the caller grants `id-token: write`, the workflow
+  checks the npm version first and fails before releasing.
 
 **GitHub Packages.** A package whose `publishConfig.registry` is
 `https://npm.pkg.github.com` grants `packages: write` instead of `id-token: write`

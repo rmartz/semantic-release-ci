@@ -93,6 +93,31 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
+      # @semantic-release/npm publishes with the runner's npm, not the npm 11 it
+      # depends on: it prefers a node_modules/.bin/npm, and pnpm links only
+      # direct dependencies' binaries there. npm trusted publishing needs npm >=
+      # 11.5.1; an older npm completes the OIDC exchange, then fails `npm publish`
+      # with ENEEDAUTH after the tag is already pushed (rmartz/merge-safety#76).
+      # A caller that granted `id-token: write` is publishing that way, so fail
+      # here, before anything is tagged, when the Node it chose ships an older npm.
+      # The runner sets ACTIONS_ID_TOKEN_REQUEST_URL only when that scope is
+      # granted. It is a runner variable, not part of the `env` context, so the
+      # test lives in the script rather than in an `if:`.
+      - name: Check npm supports trusted publishing
+        run: |
+          set -euo pipefail
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "No id-token: write grant; not publishing with npm trusted publishing."
+            exit 0
+          fi
+          required=11.5.1
+          actual="$(npm --version)"
+          if [ "$(printf '%s\n%s\n' "$required" "$actual" | sort -V | head -n1)" != "$required" ]; then
+            echo "::error::npm $actual (Node $(node --version)) cannot publish with npm trusted publishing, which needs npm >= $required. Use node-version 24.x or later."
+            exit 1
+          fi
+          echo "npm $actual supports trusted publishing."
+
       - name: Install the toolchain
         run: pnpm -C "$RUNNER_TEMP/semantic-release-ci" install --frozen-lockfile --prod
 

@@ -47,7 +47,7 @@ describe('checkReleaseConfig', () => {
   it('fails a plugin the shared toolchain does not ship', async () => {
     const { failures } = await check('missing-plugin');
     expect(failures).toEqual([
-      expect.stringContaining('Plugin "@semantic-release/exec" is not provided'),
+      expect.stringContaining('Plugin "@semantic-release/git" is not provided'),
     ]);
   });
 
