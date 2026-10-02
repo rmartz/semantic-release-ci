@@ -92,6 +92,9 @@ and **self-manages** its own config — fix conformance gaps directly here, in a
   md-pairing, okf, okf-index, and file-caps.
 - **Safe bot merge:** [`merge-safety.yml`](.github/workflows/merge-safety.yml)
   (required check `merge-safety`) and [`bot-automerge.yml`](.github/workflows/bot-automerge.yml).
+- **PR policy:** [`pr-policy.yml`](.github/workflows/pr-policy.yml) runs
+  `rmartz/pr-policy-action` on every PR and posts the `pr-policy` verdict. It
+  passes `skip-uat: true`: the repo has nothing to user-test.
 - **CI, releases, labels** are owned here: typecheck / lint / format / test and
   the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the PR-title
   lint, the post-merge commit-convention tripwire, and the dogfooded
