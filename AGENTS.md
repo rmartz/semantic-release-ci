@@ -98,7 +98,8 @@ and **self-manages** its own config — fix conformance gaps directly here, in a
   validates PR titles (Conventional Commits, breaking-marker and type rules), so
   there is no separate PR-title-lint workflow.
 - **CI, releases, labels** are owned here: typecheck / lint / format / test and
-  the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the post-merge commit-convention tripwire, and the dogfooded
+  the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the
+  post-merge commit-convention tripwire, and the dogfooded
   [release.yml](.github/workflows/release.yml).
 
 ## Common commands
