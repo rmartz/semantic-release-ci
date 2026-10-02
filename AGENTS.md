@@ -94,10 +94,11 @@ and **self-manages** its own config — fix conformance gaps directly here, in a
   (required check `merge-safety`) and [`bot-automerge.yml`](.github/workflows/bot-automerge.yml).
 - **PR policy:** [`pr-policy.yml`](.github/workflows/pr-policy.yml) runs
   `rmartz/pr-policy-action` on every PR and posts the `pr-policy` verdict. It
-  passes `skip-uat: true`: the repo has nothing to user-test.
+  passes `skip-uat: true`: the repo has nothing to user-test. Its `title` check
+  validates PR titles (Conventional Commits, breaking-marker and type rules), so
+  there is no separate PR-title-lint workflow.
 - **CI, releases, labels** are owned here: typecheck / lint / format / test and
-  the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the PR-title
-  lint, the post-merge commit-convention tripwire, and the dogfooded
+  the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the post-merge commit-convention tripwire, and the dogfooded
   [release.yml](.github/workflows/release.yml).
 
 ## Common commands
@@ -142,7 +143,7 @@ Before pushing, run `ai-pre-push-verify -C <worktree>` and fix every failure.
   `ci.yml` and `release.yml` call them by local path to dogfood them — the
   dogfood is a test of the product, not a reason to reclassify it. The `ci` type
   is for this repo's **own** CI only: `ci.yml`, `release.yml`,
-  `repo-hygiene.yml`, the PR-title lint and other callers, and
+  `repo-hygiene.yml`, `pr-policy.yml` and other callers, and
   `.github/actions/setup`.
 - **A toolchain major** (e.g. the preset) is taken only once the `release-check`
   job passes on its Dependabot PR. A red one is the guard working: leave it open
