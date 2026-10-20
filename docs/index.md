@@ -18,5 +18,7 @@ written in [Open Knowledge Format](okf-format.md).
 - [Publish to npm before the tag is pushed](publish-order.md) — why npm
   publishers publish from an `@semantic-release/exec` `prepareCmd`, and what the
   release check fails.
+- [Tag a version published without its tag](orphaned-releases.md) — how the
+  release workflow recovers when the tag push fails after npm has published.
 - [The OKF documentation format](okf-format.md) — how these pages are structured
   and validated in this repo.

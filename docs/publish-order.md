@@ -26,8 +26,8 @@ any tag exists, and the next run retries it cleanly. The remaining failure, the
 package published but the tag push failing, is rarer: pushing a tag with the job
 token is simpler than an OIDC exchange plus a registry upload. It also leaves the
 consumer-facing state consistent, because Dependabot follows tags, and no tag
-means no consumer is moved to the version. Recover by pushing the missing tag by
-hand; a re-run would fail when it tries to publish the same version again.
+means no consumer is moved to the version. The next release run tags the orphaned
+version before releasing ([orphaned-releases.md](orphaned-releases.md)).
 
 ## The required config
 

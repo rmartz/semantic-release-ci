@@ -77,6 +77,24 @@ describe('semantic-release.yml', () => {
   });
 });
 
+describe('semantic-release.yml orphan recovery', () => {
+  // A version published before a failed tag push makes every later run fail to
+  // republish it, so the orphan is tagged before semantic-release computes the
+  // next version (docs/orphaned-releases.md).
+  it('tags orphaned versions unconditionally, right before releasing', () => {
+    const steps = stepsOf(readWorkflow('semantic-release.yml'));
+    const tag = steps.findIndex((step) => step.name === 'Tag versions published without a tag');
+    const release = steps.findIndex((step) => step.name === 'Release');
+    expect(tag).toBeGreaterThan(-1);
+    expect(release).toBe(tag + 1);
+    const tagStep = steps[tag] as Step & { if?: string };
+    expect(tagStep.if).toBeUndefined();
+    expect(tagStep.run).toContain(
+      '$RUNNER_TEMP/semantic-release-ci/src/bin/tag-orphaned-release.ts',
+    );
+  });
+});
+
 describe('release-check.yml', () => {
   it('needs nothing beyond contents: read, so it runs on Dependabot and fork PRs', () => {
     expect(readWorkflow('release-check.yml').permissions).toEqual({ contents: 'read' });
