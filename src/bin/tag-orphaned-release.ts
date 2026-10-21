@@ -67,7 +67,7 @@ const tagFormat = loaded?.config.tagFormat ?? DEFAULT_TAG_FORMAT;
 const scope = name.startsWith('@') ? name.split('/')[0] : undefined;
 const publishConfig = manifest.publishConfig ?? {};
 const registry = (scope && publishConfig[`${scope}:registry`]) || publishConfig.registry || NPMJS;
-const url = `${registry.replace(/\/$/, '')}/${name.replace('/', '%2f')}`;
+const url = `${registry.replace(/\/$/, '')}/${name.replaceAll('/', '%2f')}`;
 const token = process.env.NPM_TOKEN;
 const response = await fetch(url, {
   headers: { accept: 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
