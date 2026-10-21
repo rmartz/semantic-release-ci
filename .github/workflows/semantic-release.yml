@@ -146,6 +146,17 @@ jobs:
           BUILD_COMMAND: ${{ inputs.build-command }}
         run: bash -c "$BUILD_COMMAND"
 
+      # An npm publisher publishes before the tag is pushed (docs/publish-order.md),
+      # so a failed tag push leaves a published version with no tag, and every
+      # later run fails to republish it (E403). Tag such orphans first so this run
+      # releases the next version (docs/orphaned-releases.md). Run from the
+      # caller's checkout; a repo that does not publish to npm is a no-op.
+      - name: Tag versions published without a tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ inputs.github-packages && github.token || '' }}
+        run: node "$RUNNER_TEMP/semantic-release-ci/src/bin/tag-orphaned-release.ts"
+
       # Run from the caller's checkout: semantic-release reads the release config
       # and git history from the working directory, and resolves its plugins and
       # preset from its own install first — the shared toolchain.

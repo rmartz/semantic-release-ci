@@ -20,6 +20,7 @@ import { checkPublishOrder } from './publish-order.ts';
 export type ReleaseConfig = {
   plugins?: unknown[];
   repositoryUrl?: string;
+  tagFormat?: string;
   extends?: unknown;
 };
 

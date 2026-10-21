@@ -64,6 +64,9 @@ checklist's "renaming a shared check" rule). Full reference:
   in semantic-release's `publish` step, after the tag is pushed
   ([docs/publish-order.md](docs/publish-order.md)). Loosening that rule
   reintroduces tags with no package behind them.
+- **A failed tag push heals on the next run.** `semantic-release.yml` tags a
+  version npm has but git lacks before releasing
+  ([docs/orphaned-releases.md](docs/orphaned-releases.md)).
 
 `test/workflow-contract.test.ts` guards the workflow invariants.
 
