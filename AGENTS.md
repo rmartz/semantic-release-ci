@@ -100,6 +100,9 @@ and **self-manages** its own config — fix conformance gaps directly here, in a
   passes `skip-uat: true`: the repo has nothing to user-test. Its `title` check
   validates PR titles (Conventional Commits, breaking-marker and type rules), so
   there is no separate PR-title-lint workflow.
+- **PR lifecycle labels:** [`pr-lifecycle.yml`](.github/workflows/pr-lifecycle.yml)
+  runs `rmartz/pr-lifecycle-action` without arming, with `uat: 'off'` matching `skip-uat`: it keeps each PR's lifecycle labels current, marks every PR `no UAT needed`, and posts the `pr-lifecycle/sign-off` status (as the `rmartz-pr-lifecycle` App, which the `pr-policy` caller trusts). `bot-automerge.yml` still does the
+  merging.
 - **CI, releases, labels** are owned here: typecheck / lint / format / test and
   the dogfooded `release-check` ([ci.yml](.github/workflows/ci.yml)), the
   post-merge commit-convention tripwire, and the dogfooded
