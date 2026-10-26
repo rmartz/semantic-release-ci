@@ -97,7 +97,9 @@ and **self-manages** its own config — fix conformance gaps directly here, in a
   (required check `merge-safety`) and [`bot-automerge.yml`](.github/workflows/bot-automerge.yml).
 - **PR policy:** [`pr-policy.yml`](.github/workflows/pr-policy.yml) runs
   `rmartz/pr-policy-action` on every PR and posts the `pr-policy` verdict. It
-  passes `skip-uat: true`: the repo has nothing to user-test. Its `title` check
+  passes `skip-uat: true`: the repo skips UAT by choice (the reusable workflows
+  it ships are user-facing, so this is a decision, not a claim there's nothing to
+  test). Its `title` check
   validates PR titles (Conventional Commits, breaking-marker and type rules), so
   there is no separate PR-title-lint workflow.
 - **PR lifecycle labels:** [`pr-lifecycle.yml`](.github/workflows/pr-lifecycle.yml)
