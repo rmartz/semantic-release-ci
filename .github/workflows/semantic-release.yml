@@ -80,7 +80,7 @@ jobs:
           path: _semantic-release-ci
 
       - name: Set up pnpm for the toolchain
-        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           package_json_file: _semantic-release-ci/package.json
 
@@ -125,7 +125,7 @@ jobs:
       # the toolchain install, so their pnpm shadows ours from here on.
       - name: Set up pnpm for the build
         if: inputs.build-command != '' && inputs.package-manager == 'pnpm'
-        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
       - name: Install dependencies
         if: inputs.build-command != ''
