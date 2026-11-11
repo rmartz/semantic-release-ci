@@ -69,7 +69,7 @@ Full documentation lives in [`docs/`](docs/index.md):
 ## Development
 
 This repo is CI-only and unpublished. Its `dependencies` are the shipped
-toolchain; the check is TypeScript run directly by Node 24.
+toolchain; the check is TypeScript run directly by Node 26.
 
 ```bash
 pnpm install

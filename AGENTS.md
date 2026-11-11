@@ -122,7 +122,7 @@ pnpm run release-check       # the check, against this repo's own .releaserc.jso
 node src/bin/release-check.ts --cwd ../other-repo   # …or against another checkout
 ```
 
-The TypeScript runs directly on Node 24's type stripping — there is no build
+The TypeScript runs directly on Node 26's type stripping — there is no build
 step, so source must stay erasable-only (`erasableSyntaxOnly`: no enums,
 namespaces, or parameter properties) and import siblings with a `.ts` extension.
 
