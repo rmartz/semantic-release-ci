@@ -30,7 +30,7 @@ on:
         description: 'Node.js version the toolchain (and any build-command) runs on.'
         type: string
         required: false
-        default: 24.x
+        default: 26.x
       package-manager:
         description: 'pnpm | npm — how the caller installs its own dependencies when build-command is set.'
         type: string
