@@ -86,9 +86,10 @@ the two shipped workflows inline their setup rather than referencing
 
 ## Repository conformance
 
-This repo is held to the shared
-[repository checklist](https://github.com/rmartz/ai/blob/main/docs/guidance/repository-checklist.md)
-and **self-manages** its own config — fix conformance gaps directly here, in a PR.
+This repo is held to the shared repository checklist
+(`~/.claude/knowledge/guidance/repository-checklist.md` in the agent knowledge
+base) and **self-manages** its own config — fix conformance gaps directly here,
+in a PR.
 
 - **Hygiene** arrives via the [`repo-hygiene.yml`](.github/workflows/repo-hygiene.yml)
   caller, running conflict-markers, action-pins, package-pins, docs-links,
