@@ -16,7 +16,7 @@ that was published but never tagged, at the commit it was published from.
 
 An npm publisher publishes in `prepare`, before the tag is pushed
 ([publish-order.md](publish-order.md)). If the tag push then fails, the version is
-on the registry with no tag. In rmartz/pr-lifecycle, 11.1.0 was published and
+on the registry with no tag. In the retired PR automation, 11.1.0 was published and
 `git push --tags` got a GitHub `Internal Server Error`. semantic-release finds the
 next version from the last tag, so every later run recomputed 11.1.0 and failed
 `npm publish` with E403. Re-running the release did not help either. The repo could
