@@ -35,7 +35,7 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      # Split by dependency type (rmartz/ai#82). The production dependencies ARE
+      # Split by dependency type. The production dependencies ARE
       # the release toolchain every consumer runs, so a bump is a `fix` that cuts a
       # release; a dev-dependency bump never reaches a consumer, so it is a
       # release-less `chore`.
