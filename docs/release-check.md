@@ -26,7 +26,7 @@ throws:
 > conventional-changelog-writer@9 or newer …"
 
 and the Release run on the next push to `main` fails. It happened in
-rmartz/storybook-ci#3 and rmartz/pr-lifecycle#18, and was open again at once in
+rmartz/storybook-ci#3 and in the retired PR automation, and was open again at once in
 three repos when this repo was created.
 
 ## Why a dry-run cannot catch it

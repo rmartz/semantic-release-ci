@@ -6,7 +6,7 @@
  * transient GitHub 500, the version is on the registry and the tag is not. Every
  * later run recomputes that same version from the last tag and fails `npm publish`
  * with E403, so the repo cannot release again until someone pushes the tag by hand
- * (rmartz/pr-lifecycle 11.1.0). The release workflow tags these orphans before it
+ * (the retired PR automation's 11.1.0). The release workflow tags these orphans before it
  * runs semantic-release, so the next run picks up from them instead.
  * See docs/orphaned-releases.md.
  */
