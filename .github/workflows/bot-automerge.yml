@@ -24,7 +24,7 @@ name: bot-automerge
 # without it a bot merge reaches main with no CI, Release or merge-safety
 # invalidation run. App-authored events do trigger `push` workflows, and the App
 # draws on its own rate-limit pool rather than the user's, so a coordinator run
-# that exhausts the user's GraphQL quota cannot fail this job (rmartz/scripts#22).
+# that exhausts the user's GraphQL quota cannot fail this job.
 # The token step fails closed: if the App credentials are missing the job fails
 # rather than silently falling back to GITHUB_TOKEN.
 
